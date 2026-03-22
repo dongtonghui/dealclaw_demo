@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DealClaw 外贸数字员工平台 - 内测版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background-color: #F1F5F9; color: #1E293B; }
+        
+        /* Blue Tech Theme */
+        .btn-primary {
+            background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .nav-item {
+            transition: all 0.2s;
+        }
+        .nav-item:hover {
+            background-color: rgba(37, 99, 235, 0.08);
+            color: #2563EB;
+        }
+        .nav-item.active {
+            background-color: rgba(37, 99, 235, 0.12);
+            color: #2563EB;
+            border-right: 3px solid #2563EB;
+        }
+        
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card-hover {
+            transition: all 0.2s;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Grade badges */
+        .grade-a { background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); color: #065F46; }
+        .grade-b { background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); color: #1E40AF; }
+        .grade-c { background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%); color: #4B5563; }
+        
+        /* Toast notifications */
+        .toast {
+            animation: slideInRight 0.3s ease-out;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm">
+        <!-- Logo -->
+        <div class="p-5 border-b border-slate-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
+                    D
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h1 class="font-bold text-base text-slate-800">DealClaw</h1>
+                    <p class="text-[11px] text-slate-500 truncate">外贸数字员工平台</p>
+                </div>
+                <span class="text-[10px] bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-0.5 rounded-full font-semibold">内测</span>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="flex-1 py-4 space-y-1 overflow-auto">
+            <button onclick="showPage('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center gap-3 px-5 py-3 text-sm font-medium text-slate-600">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                <span>任务看板</span>
+            </button>
+            <button onclick="showPage('neo-workbench')" id="nav-neo" class="nav-item w-full flex items-center gap-3 px-5 py-3 text-sm font-medium text-slate-600">
+                <div class="relative">
+                    <div class="w-5 h-5 bg-gradient-to-br from-blue-600 to-blue-500 rounded-md flex items-center justify-center">
+                        <span class="text-white text-xs font-bold">N</span>
+                    </div>
+                    <div class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-white animate-pulse"></div>
+                </div>
+                <span>NEO 工作台</span>
+            </button>
+            <button onclick="showPage('whatsapp')" id="nav-whatsapp" class="nav-item w-full flex items-center gap-3 px-5 py-3 text-sm font-medium text-slate-600">
+                <div class="relative">
+                    <div class="w-5 h-5 bg-gradient-to-br from-green-500 to-green-600 rounded-md flex items-center justify-center">
+                        <i data-lucide="message-circle" class="w-3 h-3 text-white"></i>
+                    </div>
+                    <div class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white"></div>
+                </div>
+                <span>WhatsApp 消息</span>
+                <span id="nav-whatsapp-badge" class="ml-auto text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-medium hidden">0</span>
+            </button>
+            
+            <div class="px-5 py-3">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">即将推出</p>
+            </div>
+            <button class="w-full flex items-center gap-3 px-5 py-3 text-sm font-medium text-slate-300 cursor-not-allowed">
+                <div class="w-5 h-5 bg-slate-200 rounded-md flex items-center justify-center">
+                    <span class="text-white text-xs font-bold">L</span>
+                </div>
+                <span>LIA 培育中心</span>
+            </button>
+            <button class="w-full flex items-center gap-3 px-5 py-3 text-sm font-medium text-slate-300 cursor-not-allowed">
+                <div class="w-5 h-5 bg-slate-200 rounded-md flex items-center justify-center">
+                    <span class="text-white text-xs font-bold">A</span>
+                </div>
+                <span>AURA 数据分析</span>
+            </button>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="flex-1 overflow-auto bg-slate-50">
+        
+        <!-- PAGE 1: Dashboard -->
+        <div id="page-dashboard" class="page-content p-6 max-w-7xl mx-auto">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">任务看板</h2>
+                    <p class="text-slate-500 text-sm mt-1">管理和跟踪您的 AI 获客任务</p>
+                </div>
+                <button onclick="showPage('task-create')" class="btn-primary px-5 py-2.5 rounded-lg font-medium flex items-center gap-2">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
+                    新建任务
+                </button>
+            </div>
+            
+            <!-- Stats -->
+            <div class="grid grid-cols-5 gap-4 mb-6">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 card-hover">
+                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">今日新增客户</p>
+                    <p class="text-3xl font-bold text-blue-600" id="stat-new-customers">12</p>
+                    <p class="text-xs text-emerald-500 mt-2 flex items-center gap-1">
+                        <i data-lucide="trending-up" class="w-3 h-3"></i> +23%
+                    </p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 card-hover">
+                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">A级客户</p>
+                    <p class="text-3xl font-bold text-emerald-500" id="stat-grade-a">3</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 card-hover">
+                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">待发开发信</p>
+                    <p class="text-3xl font-bold text-amber-500">5</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 card-hover">
+                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">WhatsApp在线</p>
+                    <p class="text-3xl font-bold text-green-500" id="stat-whatsapp-online">2</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 card-hover">
+                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">进行中任务</p>
+                    <p class="text-3xl font-bold text-blue-600">2</p>
+                </div>
+            </div>
+            
+            <!-- Quick Create -->
+            <div class="bg-white rounded-xl p-6 border border-slate-200 mb-6">
+                <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                    <i data-lucide="zap" class="w-5 h-5 text-blue-600"></i>
+                    快速创建任务
+                </h3>
+                <div class="flex gap-3">
+                    <div class="flex-1 relative">
+                        <i data-lucide="sparkles" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-600"></i>
+                        <input type="text" id="quick-input" placeholder="帮我找50个美国LED批发商，年采购额100万以上..." 
+                            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
+                    </div>
+                    <button onclick="quickCreate()" class="btn-primary px-6 py-3.5 rounded-lg font-medium flex items-center gap-2">
+                        <i data-lucide="wand-2" class="w-5 h-5"></i>
+                        AI 解析
+                    </button>
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <span class="text-xs text-slate-400">试试：</span>
+                    <button onclick="fillQuick('帮我找30个德国汽车零部件进口商')" class="text-xs text-blue-600 hover:underline">德国汽车零部件</button>
+                    <span class="text-slate-300">·</span>
+                    <button onclick="fillQuick('帮我找50个东南亚电子产品批发商')" class="text-xs text-blue-600 hover:underline">东南亚电子</button>
+                </div>
+            </div>
+            
+            <!-- Task List -->
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="font-semibold text-slate-800">进行中的任务</h3>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md font-medium">全部</button>
+                        <button class="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 rounded-md transition-colors font-medium">获客</button>
+                        <button class="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 rounded-md transition-colors font-medium">培育</button>
+                    </div>
+                </div>
+                <div id="task-list" class="divide-y divide-slate-100">
+                    <!-- Tasks rendered by JS -->
+                </div>
+            </div>
+            
+            <!-- Activity -->
+            <div class="mt-6 bg-white rounded-xl border border-slate-200 p-5">
+                <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                    <i data-lucide="bell" class="w-5 h-5 text-blue-600"></i>
+                    最近动态
+                </h3>
+                <div id="activity-list" class="space-y-2">
+                    <!-- Activities rendered by JS -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- PAGE 2: Task Create -->
+        <div id="page-task-create" class="page-content hidden p-6 max-w-3xl mx-auto">
+            <button onclick="showPage('dashboard')" class="flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-6">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                返回任务看板
+            </button>
+            
+            <div class="bg-white rounded-xl border border-slate-200 p-8">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">新建获客任务</h2>
+                <p class="text-slate-500 mb-6">描述您的获客需求，AI 将自动解析配置</p>
+                
+                <!-- Step 1 -->
+                <div id="create-step-1">
+                    <label class="block text-sm font-medium text-slate-700 mb-3">用自然语言描述您的获客需求</label>
+                    <textarea id="task-desc" rows="4" placeholder="例如：帮我找50个美国LED批发商，年采购额100万以上..." 
+                        class="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none"></textarea>
+                    <div class="mt-6 flex justify-end">
+                        <button onclick="parseTask()" class="btn-primary px-6 py-3 rounded-lg font-medium flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                            AI 解析配置
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Step 2 -->
+                <div id="create-step-2" class="hidden">
+                    <div class="flex items-center gap-2 mb-4 text-blue-600">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        <span class="font-medium">AI 已解析以下配置，请确认</span>
+                    </div>
+                    <div class="bg-blue-50/50 rounded-lg p-5 space-y-4 mb-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">产品</label>
+                                <input type="text" id="cfg-product" value="LED" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">目标市场</label>
+                                <input type="text" id="cfg-market" value="美国" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">客户类型</label>
+                                <input type="text" id="cfg-type" value="批发商" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">年采购额</label>
+                                <input type="text" id="cfg-amount" value=">$100万" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">目标数量</label>
+                                <input type="number" id="cfg-count" value="50" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between">
+                        <button onclick="showStep(1)" class="px-5 py-2.5 text-slate-600 hover:text-slate-800">重新输入</button>
+                        <div class="flex gap-3">
+                            <button onclick="showPage('dashboard')" class="px-5 py-2.5 text-slate-600 hover:text-slate-800">取消</button>
+                            <button onclick="confirmCreate()" class="btn-primary px-6 py-2.5 rounded-lg font-medium">确认创建</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PAGE 3: NEO Workbench -->
+        <div id="page-neo-workbench" class="page-content hidden p-6 max-w-6xl mx-auto">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <button onclick="showPage('dashboard')" class="p-2 hover:bg-white rounded-xl transition-colors">
+                        <i data-lucide="arrow-left" class="w-5 h-5 text-slate-500"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl flex items-center justify-center">
+                            <span class="text-white font-bold">N</span>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">NEO 获客工作台</h2>
+                            <p class="text-slate-500 text-sm">AI 获客专员 · 基于 1,240 条反馈持续优化</p>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="showPage('task-create')" class="btn-primary px-5 py-2.5 rounded-lg font-medium flex items-center gap-2">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
+                    新建需求
+                </button>
+            </div>
+            
+            <div id="neo-task-list" class="space-y-4">
+                <!-- NEO tasks rendered by JS -->
+            </div>
+        </div>
+        
+        <!-- PAGE 4: Demand Detail -->
+        <div id="page-demand-detail" class="page-content hidden p-6 max-w-6xl mx-auto">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <button onclick="showPage('neo-workbench')" class="p-2 hover:bg-white rounded-xl transition-colors">
+                        <i data-lucide="arrow-left" class="w-5 h-5 text-slate-500"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800" id="detail-task-name">美国LED批发商获客</h2>
+                        <p class="text-slate-500 text-sm">创建时间: 2026-03-20</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button class="px-4 py-2 text-slate-600 hover:text-slate-800 border border-slate-200 rounded-lg hover:bg-slate-50">暂停</button>
+                    <button class="px-4 py-2 text-red-500 hover:text-red-600">结束任务</button>
+                </div>
+            </div>
+            
+            <!-- Progress Card -->
+            <div class="bg-white rounded-xl p-6 border border-slate-200 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-slate-800">执行进度</h3>
+                    <span class="text-sm font-medium text-blue-600" id="detail-progress-text">45/50</span>
+                </div>
+                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden mb-4">
+                    <div id="detail-progress-bar" class="h-full bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full transition-all" style="width: 90%"></div>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                        <span class="text-slate-500">A级:</span>
+                        <span class="font-semibold text-emerald-500" id="detail-grade-a">12</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        <span class="text-slate-500">B级:</span>
+                        <span class="font-semibold text-blue-500" id="detail-grade-b">18</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-slate-400 rounded-full"></span>
+                        <span class="text-slate-500">C级:</span>
+                        <span class="font-semibold text-slate-600" id="detail-grade-c">15</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
+                        <span class="text-slate-500">开发信:</span>
+                        <span class="font-semibold text-slate-800">8/12 已发送</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div class="border-b border-slate-200">
+                    <div class="flex">
+                        <button onclick="switchTab('customers')" id="tab-customers" class="tab-btn px-6 py-4 text-sm font-medium text-blue-600 border-b-2 border-blue-600">客户列表</button>
+                        <button onclick="switchTab('config')" id="tab-config" class="tab-btn px-6 py-4 text-sm font-medium text-slate-500 hover:text-slate-700">配置信息</button>
+                    </div>
+                </div>
+                
+                <!-- Customers Tab -->
+                <div id="tab-content-customers" class="p-6">
+                    <div class="flex flex-wrap gap-3 mb-6">
+                        <select id="filter-grade" onchange="renderCustomers()" class="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                            <option value="all">全部级别</option>
+                            <option value="A">A级 - 高意向</option>
+                            <option value="B">B级 - 中意向</option>
+                            <option value="C">C级 - 潜在</option>
+                        </select>
+                        <select id="filter-email" onchange="renderCustomers()" class="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                            <option value="all">全部状态</option>
+                            <option value="none">未发送开发信</option>
+                            <option value="sent">已发送</option>
+                        </select>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="text-left text-xs text-slate-500 border-b border-slate-100">
+                                    <th class="pb-3">客户信息</th>
+                                    <th class="pb-3">级别</th>
+                                    <th class="pb-3">WhatsApp</th>
+                                    <th class="pb-3">开发信</th>
+                                    <th class="pb-3 text-right">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customer-table-body">
+                                <!-- Customers rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Config Tab -->
+                <div id="tab-content-config" class="hidden p-6">
+                    <div class="max-w-2xl grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">产品</label>
+                            <p class="font-medium text-slate-800">LED照明产品</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">目标市场</label>
+                            <p class="font-medium text-slate-800">美国</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">客户类型</label>
+                            <p class="font-medium text-slate-800">批发商</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">年采购额要求</label>
+                            <p class="font-medium text-slate-800">>$100万</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PAGE 5: WhatsApp -->
+        <div id="page-whatsapp" class="page-content hidden h-full">
+            <div class="h-full flex">
+                <!-- Chat List -->
+                <div class="w-80 bg-white border-r border-slate-200 flex flex-col">
+                    <div class="p-4 border-b border-slate-200">
+                        <h3 class="font-semibold text-slate-800 mb-3">WhatsApp 消息</h3>
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                            <input type="text" placeholder="搜索客户..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-auto" id="whatsapp-chat-list">
+                        <!-- Chat list rendered by JS -->
+                    </div>
+                </div>
+                
+                <!-- Chat Area -->
+                <div class="flex-1 flex flex-col bg-slate-50" id="whatsapp-chat-area">
+                    <!-- Empty State -->
+                    <div id="whatsapp-empty" class="flex-1 flex flex-col items-center justify-center text-slate-400">
+                        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="message-circle" class="w-12 h-12 text-green-500"></i>
+                        </div>
+                        <p class="text-lg font-medium text-slate-600">选择一个客户开始聊天</p>
+                        <p class="text-sm mt-2">通过 WhatsApp 直接与客户沟通</p>
+                    </div>
+                    
+                    <!-- Active Chat -->
+                    <div id="whatsapp-active" class="hidden flex-col h-full">
+                        <div class="bg-white px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="relative">
+                                    <div id="chat-avatar" class="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-full flex items-center justify-center text-white font-semibold">J</div>
+                                    <div id="chat-online" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                                </div>
+                                <div>
+                                    <h4 id="chat-name" class="font-semibold text-slate-800">John Smith</h4>
+                                    <p id="chat-status" class="text-xs text-green-600">在线</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="chat-messages" class="flex-1 overflow-auto p-4 space-y-4">
+                            <!-- Messages rendered by JS -->
+                        </div>
+                        
+                        <div class="bg-white p-4 border-t border-slate-200">
+                            <div class="flex gap-2 mb-3 overflow-x-auto">
+                                <button onclick="sendQuick('您好，感谢您联系我们！')" class="whitespace-nowrap px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-full transition-colors">问候语</button>
+                                <button onclick="sendQuick('这是我们的最新产品目录')" class="whitespace-nowrap px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-full transition-colors">发送目录</button>
+                                <button onclick="sendQuick('我们的价格非常有竞争力')" class="whitespace-nowrap px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-full transition-colors">价格咨询</button>
+                            </div>
+                            <div class="flex gap-3">
+                                <input type="text" id="chat-input" placeholder="输入消息..." class="flex-1 px-4 py-2.5 bg-slate-100 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20" onkeydown="if(event.key==='Enter')sendMessage()">
+                                <button onclick="sendMessage()" class="p-3 bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors shadow-lg shadow-green-500/30">
+                                    <i data-lucide="send" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </main>
+    
+    <!-- Customer Detail Modal -->
+    <div id="customer-detail-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-lg m-4 shadow-2xl max-h-[90vh] overflow-auto">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-800">客户详情</h3>
+                <button onclick="closeCustomerDetail()" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5 text-slate-500"></i>
+                </button>
+            </div>
+            <div id="customer-detail-content" class="p-6">
+                <!-- Content rendered by JS -->
+            </div>
+            <div class="p-6 border-t border-slate-100 flex gap-3">
+                <button id="detail-email-btn" class="flex-1 py-3 btn-primary text-white rounded-xl font-medium flex items-center justify-center gap-2">
+                    <i data-lucide="mail" class="w-5 h-5"></i>
+                    写开发信
+                </button>
+                <button id="detail-whatsapp-btn" class="flex-1 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium flex items-center justify-center gap-2">
+                    <i data-lucide="message-circle" class="w-5 h-5"></i>
+                    WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Email Modal -->
+    <div id="email-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-2xl m-4 shadow-2xl">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">编辑开发信</h3>
+                    <p class="text-sm text-slate-500 mt-1">AI 已为 <span id="email-customer-name">客户</span> 生成个性化内容</p>
+                </div>
+                <button onclick="closeEmailModal()" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5 text-slate-500"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label class="block text-xs text-slate-500 mb-1">收件人</label>
+                    <p id="email-to" class="text-sm text-slate-800 font-medium">john@example.com</p>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs text-slate-500 mb-1">主题</label>
+                    <input type="text" id="email-subject" value="Quality LED Solutions - Partnership Opportunity" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs text-slate-500 mb-1">内容</label>
+                    <textarea id="email-body" rows="12" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                </div>
+                <div class="bg-amber-50 rounded-lg p-3 flex items-start gap-2">
+                    <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0"></i>
+                    <p class="text-xs text-amber-700">AI 建议：该客户近期有商业照明项目需求，建议在邮件中提及相关案例和快速交付能力。</p>
+                </div>
+            </div>
+            <div class="p-6 border-t border-slate-100 flex justify-between">
+                <button onclick="regenerateEmail()" class="px-4 py-2 text-slate-600 hover:text-slate-800 flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    重新生成
+                </button>
+                <div class="flex gap-3">
+                    <button onclick="closeEmailModal()" class="px-5 py-2.5 text-slate-600 hover:text-slate-800">取消</button>
+                    <button onclick="sendEmail()" class="px-6 py-2.5 btn-primary text-white rounded-xl font-medium flex items-center gap-2">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        发送开发信
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
+
+    <script>
+        // ==========================================
+        // DATA STORE
+        // ==========================================
+        const store = {
+            tasks: [
+                {
+                    id: 't1',
+                    name: '美国LED批发商获客',
+                    status: 'running',
+                    type: 'neo',
+                    config: { product: 'LED', market: '美国', type: '批发商', amount: '>$100万', targetCount: 50 },
+                    progress: { current: 45, total: 50, percentage: 90 },
+                    results: { gradeA: 12, gradeB: 18, gradeC: 15, emailsSent: 8 },
+                    createdAt: '2026-03-20'
+                },
+                {
+                    id: 't2',
+                    name: '欧洲汽车配件客户',
+                    status: 'running',
+                    type: 'neo',
+                    config: { product: '汽车配件', market: '欧洲', type: '进口商', amount: '>$200万', targetCount: 30 },
+                    progress: { current: 20, total: 30, percentage: 67 },
+                    results: { gradeA: 5, gradeB: 8, gradeC: 7, emailsSent: 3 },
+                    createdAt: '2026-03-21'
+                }
+            ],
+            customers: [
+                {
+                    id: 'c1',
+                    taskId: 't1',
+                    name: 'John Smith',
+                    company: 'BrightLight Distributors Inc.',
+                    country: '美国',
+                    email: 'john@brightlight.com',
+                    phone: '+1 555-0123',
+                    whatsapp: { status: 'online', connected: true, lastSeen: '在线' },
+                    grade: 'A',
+                    confidence: 92,
+                    intent: '正在寻找LED供应商，有商业照明项目',
+                    gradeReasons: ['年采购额>$200万', '近期有招标需求', '决策人可直接联系'],
+                    suggestion: '强调产品质量认证和项目案例',
+                    emailStatus: 'none',
+                    chatHistory: [
+                        { type: 'received', content: 'Hi, I saw your products. Do you have catalog?', time: '09:30', status: 'read' },
+                        { type: 'sent', content: 'Hello John! Yes, we have a full catalog.', time: '09:35', status: 'read' }
+                    ]
+                },
+                {
+                    id: 'c2',
+                    taskId: 't1',
+                    name: 'Sarah Johnson',
+                    company: 'LumiTech Solutions LLC',
+                    country: '美国',
+                    email: 'sarah@lumitech.com',
+                    phone: '+1 555-0456',
+                    whatsapp: { status: 'offline', connected: true, lastSeen: '2小时前' },
+                    grade: 'A',
+                    confidence: 88,
+                    intent: '需要升级照明产品线，对价格敏感',
+                    gradeReasons: ['多渠道采购历史', '正在对比供应商'],
+                    suggestion: '突出性价比和批量折扣',
+                    emailStatus: 'sent',
+                    chatHistory: []
+                },
+                {
+                    id: 'c3',
+                    taskId: 't1',
+                    name: 'Mike Chen',
+                    company: 'West Coast Lighting',
+                    country: '美国',
+                    email: 'mike@wclighting.com',
+                    phone: '+1 555-0789',
+                    whatsapp: { status: 'offline', connected: false, lastSeen: null },
+                    grade: 'B',
+                    confidence: 72,
+                    intent: '有潜在需求，但决策周期较长',
+                    gradeReasons: ['公司规模中等', '采购历史不规律'],
+                    suggestion: '长期培育，定期跟进',
+                    emailStatus: 'none',
+                    chatHistory: []
+                }
+            ],
+            activities: [
+                { type: 'discovery', message: 'NEO 在美国LED任务中发现 3 个 A级客户', time: '10分钟前' },
+                { type: 'whatsapp', message: 'John Smith 回复了您的 WhatsApp 消息', time: '15分钟前' },
+                { type: 'progress', message: '欧洲汽车配件任务进度更新：20/30', time: '30分钟前' }
+            ],
+            currentTaskId: null,
+            currentCustomerId: null,
+            currentEmailCustomerId: null
+        };
+        
+        // ==========================================
+        // CUSTOMER DETAIL FUNCTIONS
+        // ==========================================
+        function showCustomerDetail(customerId) {
+            const customer = store.customers.find(c => c.id === customerId);
+            if (!customer) return;
+            
+            const content = document.getElementById('customer-detail-content');
+            const isOnline = customer.whatsapp && customer.whatsapp.status === 'online';
+            
+            content.innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
+                        ${customer.name.charAt(0)}
+                    </div>
+                    <h4 class="font-bold text-xl text-slate-800">${customer.name}</h4>
+                    <p class="text-slate-500">${customer.company}</p>
+                    <div class="flex items-center justify-center gap-2 mt-2">
+                        <span class="grade-${customer.grade.toLowerCase()} px-3 py-1 text-sm font-medium rounded-lg">${customer.grade}级客户</span>
+                        <span class="text-sm text-slate-400">置信度 ${customer.confidence}%</span>
+                    </div>
+                    ${customer.whatsapp && customer.whatsapp.connected ? `
+                        <div class="flex items-center justify-center gap-2 mt-3">
+                            <div class="w-2 h-2 ${isOnline ? 'bg-green-500' : 'bg-slate-400'} rounded-full"></div>
+                            <span class="text-sm ${isOnline ? 'text-green-600 font-medium' : 'text-slate-400'}">
+                                WhatsApp ${isOnline ? '在线' : customer.whatsapp.lastSeen}
+                            </span>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="bg-slate-50 rounded-xl p-4">
+                        <label class="text-xs text-slate-500 mb-1 block">采购意向</label>
+                        <p class="text-sm text-slate-800 font-medium">${customer.intent}</p>
+                    </div>
+                    
+                    <div class="bg-slate-50 rounded-xl p-4">
+                        <label class="text-xs text-slate-500 mb-1 block">联系信息</label>
+                        <div class="space-y-2">
+                            <p class="text-sm text-slate-800 flex items-center gap-2">
+                                <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
+                                ${customer.email}
+                            </p>
+                            <p class="text-sm text-slate-800 flex items-center gap-2">
+                                <i data-lucide="phone" class="w-4 h-4 text-slate-400"></i>
+                                ${customer.phone}
+                            </p>
+                            <p class="text-sm text-slate-800 flex items-center gap-2">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-slate-400"></i>
+                                ${customer.country}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-xl p-4">
+                        <label class="text-xs text-blue-600 mb-1 block flex items-center gap-1">
+                            <i data-lucide="sparkles" class="w-3 h-3"></i>
+                            AI 建议话术
+                        </label>
+                        <p class="text-sm text-slate-800">${customer.suggestion || '根据客户需求，提供个性化的产品推荐和解决方案。'}</p>
+                    </div>
+                    
+                    <div class="bg-slate-50 rounded-xl p-4">
+                        <label class="text-xs text-slate-500 mb-1 block">评级原因</label>
+                        <ul class="space-y-1">
+                            ${customer.gradeReasons ? customer.gradeReasons.map(reason => `
+                                <li class="text-sm text-slate-800 flex items-start gap-2">
+                                    <span class="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></span>
+                                    ${reason}
+                                </li>
+                            `).join('') : `
+                                <li class="text-sm text-slate-800 flex items-start gap-2">
+                                    <span class="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></span>
+                                    符合目标客户画像
+                                </li>
+                            `}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            // Update buttons
+            const emailBtn = document.getElementById('detail-email-btn');
+            const whatsappBtn = document.getElementById('detail-whatsapp-btn');
+            
+            emailBtn.onclick = function() {
+                closeCustomerDetail();
+                openEmailModal(customerId);
+            };
+            
+            if (customer.whatsapp && customer.whatsapp.connected) {
+                whatsappBtn.style.display = 'flex';
+                whatsappBtn.onclick = function() {
+                    closeCustomerDetail();
+                    openChat(customerId);
+                };
+            } else {
+                whatsappBtn.style.display = 'none';
+            }
+            
+            document.getElementById('customer-detail-modal').classList.remove('hidden');
+            document.getElementById('customer-detail-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+        
+        function closeCustomerDetail() {
+            document.getElementById('customer-detail-modal').classList.add('hidden');
+            document.getElementById('customer-detail-modal').classList.remove('flex');
+        }
+        
+        // ==========================================
+        // EMAIL FUNCTIONS
+        // ==========================================
+        function openEmailModal(customerId) {
+            const customer = store.customers.find(c => c.id === customerId);
+            if (!customer) return;
+            
+            store.currentEmailCustomerId = customerId;
+            
+            document.getElementById('email-customer-name').textContent = customer.name;
+            document.getElementById('email-to').textContent = customer.email;
+            
+            // Generate personalized email
+            const subject = `Quality ${customer.intent.includes('LED') ? 'LED' : ''} Solutions - Partnership Opportunity from DealClaw`;
+            document.getElementById('email-subject').value = subject;
+            
+            const emailBody = `Dear ${customer.name.split(' ')[0]},
+
+I hope this email finds you well. My name is [Your Name] from DealClaw, a leading supplier of high-quality ${customer.intent.includes('LED') ? 'LED lighting' : ''} products.
+
+I came across your company, ${customer.company}, and was impressed by your strong presence in the ${customer.country} market. ${customer.intent}
+
+Based on your business profile, I believe our products would be a great fit for your needs:
+
+• Premium quality with CE, RoHS, UL certifications
+• Competitive wholesale pricing with volume discounts
+• Fast delivery: 2-3 weeks to ${customer.country}
+• 3-5 years warranty on all products
+• OEM/ODM services available
+
+${customer.grade === 'A' ? 'I noticed you are actively looking for reliable suppliers. We would love to discuss how we can support your business growth.' : 'I would love to send you our product catalog and discuss potential partnership opportunities.'}
+
+Would you be interested in receiving our catalog and price list? I'd be happy to schedule a call to discuss further.
+
+Best regards,
+[Your Name]
+DealClaw - 外贸数字员工平台
+
+---
+This email was drafted by DealClaw AI based on customer analysis.`;
+            
+            document.getElementById('email-body').value = emailBody;
+            
+            document.getElementById('email-modal').classList.remove('hidden');
+            document.getElementById('email-modal').classList.add('flex');
+        }
+        
+        function closeEmailModal() {
+            document.getElementById('email-modal').classList.add('hidden');
+            document.getElementById('email-modal').classList.remove('flex');
+            store.currentEmailCustomerId = null;
+        }
+        
+        function regenerateEmail() {
+            const customer = store.customers.find(c => c.id === store.currentEmailCustomerId);
+            if (!customer) return;
+            
+            showToast('AI 正在重新生成开发信...', 'info');
+            
+            setTimeout(() => {
+                const newBody = document.getElementById('email-body').value
+                    .replace('Dear', 'Hello')
+                    .replace('I hope this email finds you well', 'I hope you are doing well')
+                    .replace('Best regards', 'Kind regards');
+                document.getElementById('email-body').value = newBody;
+                showToast('开发信已重新生成', 'success');
+            }, 800);
+        }
+        
+        function sendEmail() {
+            if (!store.currentEmailCustomerId) return;
+            
+            const customer = store.customers.find(c => c.id === store.currentEmailCustomerId);
+            if (customer) {
+                customer.emailStatus = 'sent';
+                
+                // Update task email count
+                const task = store.tasks.find(t => t.id === customer.taskId);
+                if (task) task.results.emailsSent++;
+                
+                showToast('开发信已发送给 ' + customer.name, 'success');
+                closeEmailModal();
+                
+                // Refresh customer list if on detail page
+                if (document.getElementById('page-demand-detail') && !document.getElementById('page-demand-detail').classList.contains('hidden')) {
+                    renderCustomers();
+                }
+            }
+        }
+        
+        // ==========================================
+        // PAGE NAVIGATION
+        // ==========================================
+        function showPage(pageId) {
+            console.log('Show page:', pageId);
+            
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // Show target
+            const target = document.getElementById('page-' + pageId);
+            if (target) {
+                target.classList.remove('hidden');
+            }
+            
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const navMap = {
+                'dashboard': 'nav-dashboard',
+                'neo-workbench': 'nav-neo',
+                'whatsapp': 'nav-whatsapp'
+            };
+            
+            const navId = navMap[pageId];
+            if (navId) {
+                const navItem = document.getElementById(navId);
+                if (navItem) navItem.classList.add('active');
+            }
+            
+            // Init page
+            if (pageId === 'dashboard') {
+                renderTaskList();
+                renderActivityList();
+            } else if (pageId === 'neo-workbench') {
+                renderNeoTaskList();
+            } else if (pageId === 'whatsapp') {
+                renderWhatsAppList();
+            }
+            
+            lucide.createIcons();
+        }
+        
+        // ==========================================
+        // DASHBOARD FUNCTIONS
+        // ==========================================
+        function renderTaskList() {
+            const container = document.getElementById('task-list');
+            if (!container) return;
+            
+            container.innerHTML = store.tasks.map(task => `
+                <div class="p-5 hover:bg-slate-50 transition-colors cursor-pointer" onclick="showDemandDetail('${task.id}')">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="px-2 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded">获客</span>
+                                <span class="text-xs text-slate-400">${task.createdAt}</span>
+                                ${task.status === 'running' ? '<span class="flex items-center gap-1 text-xs text-emerald-600"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>运行中</span>' : ''}
+                            </div>
+                            <h4 class="font-semibold text-slate-800 mb-2">${task.name}</h4>
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-xs rounded font-medium">
+                                    <span class="font-bold">N</span><span>获客</span>
+                                </div>
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                                <div class="flex items-center gap-1 px-2 py-1 bg-slate-200 text-slate-400 text-xs rounded">
+                                    <span class="font-bold">L</span><span>培育</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 text-sm">
+                                <span class="text-slate-500">进度: <span class="font-medium text-slate-800">${task.progress.current}/${task.progress.total}</span></span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span>A级 ${task.results.gradeA}</span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 bg-blue-500 rounded-full"></span>B级 ${task.results.gradeB}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="mail" class="w-3.5 h-3.5 text-slate-400"></i>开发信 ${task.results.emailsSent}</span>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderActivityList() {
+            const container = document.getElementById('activity-list');
+            if (!container) return;
+            
+            const icons = { discovery: 'search', whatsapp: 'message-circle', progress: 'loader', email: 'mail' };
+            const colors = { discovery: 'text-blue-600 bg-blue-50', whatsapp: 'text-green-600 bg-green-50', progress: 'text-amber-600 bg-amber-50', email: 'text-emerald-600 bg-emerald-50' };
+            
+            container.innerHTML = store.activities.map(act => `
+                <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors">
+                    <div class="w-8 h-8 ${colors[act.type]} rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="${icons[act.type]}" class="w-4 h-4"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-slate-800">${act.message}</p>
+                        <p class="text-xs text-slate-400 mt-0.5">${act.time}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function fillQuick(text) {
+            const input = document.getElementById('quick-input');
+            if (input) input.value = text;
+        }
+        
+        function quickCreate() {
+            const input = document.getElementById('quick-input');
+            if (!input || !input.value.trim()) {
+                showToast('请输入获客需求描述', 'error');
+                return;
+            }
+            document.getElementById('task-desc').value = input.value;
+            showPage('task-create');
+        }
+        
+        // ==========================================
+        // TASK CREATE
+        // ==========================================
+        function showStep(step) {
+            document.getElementById('create-step-1').classList.add('hidden');
+            document.getElementById('create-step-2').classList.add('hidden');
+            document.getElementById('create-step-' + step).classList.remove('hidden');
+        }
+        
+        function parseTask() {
+            const desc = document.getElementById('task-desc').value;
+            if (!desc.trim()) {
+                showToast('请输入任务描述', 'error');
+                return;
+            }
+            showToast('AI 正在解析配置...', 'info');
+            setTimeout(() => showStep(2), 500);
+        }
+        
+        function confirmCreate() {
+            const newTask = {
+                id: 't' + Date.now(),
+                name: document.getElementById('cfg-product').value + document.getElementById('cfg-market').value + '获客',
+                status: 'running',
+                type: 'neo',
+                config: {
+                    product: document.getElementById('cfg-product').value,
+                    market: document.getElementById('cfg-market').value,
+                    type: document.getElementById('cfg-type').value,
+                    amount: document.getElementById('cfg-amount').value,
+                    targetCount: parseInt(document.getElementById('cfg-count').value)
+                },
+                progress: { current: 0, total: parseInt(document.getElementById('cfg-count').value), percentage: 0 },
+                results: { gradeA: 0, gradeB: 0, gradeC: 0, emailsSent: 0 },
+                createdAt: new Date().toISOString().split('T')[0]
+            };
+            
+            store.tasks.unshift(newTask);
+            showToast('任务创建成功！NEO 开始执行', 'success');
+            showPage('dashboard');
+        }
+        
+        // ==========================================
+        // NEO WORKBENCH
+        // ==========================================
+        function renderNeoTaskList() {
+            const container = document.getElementById('neo-task-list');
+            if (!container) return;
+            
+            container.innerHTML = store.tasks.filter(t => t.type === 'neo').map(task => `
+                <div class="bg-white rounded-xl p-6 border-l-4 ${task.status === 'running' ? 'border-blue-600' : 'border-emerald-500'} border border-slate-200 card-hover">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-bold text-lg text-slate-800">${task.name}</h3>
+                                <span class="px-2 py-0.5 ${task.status === 'running' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'} text-xs rounded-full">${task.status === 'running' ? '进行中' : '已完成'}</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded">${task.config.product}</span>
+                                <span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded">${task.config.market}</span>
+                                <span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded">${task.config.type}</span>
+                            </div>
+                            <div class="flex items-center gap-6 text-sm">
+                                <div class="flex-1 max-w-xs">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-slate-400">进度</span>
+                                        <span class="font-medium text-slate-800">${task.progress.current}/${task.progress.total}</span>
+                                    </div>
+                                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full" style="width: ${task.progress.percentage}%"></div>
+                                    </div>
+                                </div>
+                                <span class="grade-a px-2 py-0.5 text-xs font-medium rounded">A ${task.results.gradeA}</span>
+                                <span class="grade-b px-2 py-0.5 text-xs font-medium rounded">B ${task.results.gradeB}</span>
+                                <span class="grade-c px-2 py-0.5 text-xs font-medium rounded">C ${task.results.gradeC}</span>
+                            </div>
+                        </div>
+                        <button onclick="showDemandDetail('${task.id}')" class="ml-4 px-4 py-2 btn-primary text-white rounded-lg text-sm font-medium">
+                            查看客户 →
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // ==========================================
+        // DEMAND DETAIL
+        // ==========================================
+        function showDemandDetail(taskId) {
+            store.currentTaskId = taskId;
+            const task = store.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            document.getElementById('detail-task-name').textContent = task.name;
+            document.getElementById('detail-progress-text').textContent = task.progress.current + '/' + task.progress.total;
+            document.getElementById('detail-progress-bar').style.width = task.progress.percentage + '%';
+            document.getElementById('detail-grade-a').textContent = task.results.gradeA;
+            document.getElementById('detail-grade-b').textContent = task.results.gradeB;
+            document.getElementById('detail-grade-c').textContent = task.results.gradeC;
+            
+            showPage('demand-detail');
+            switchTab('customers');
+            renderCustomers();
+        }
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                btn.classList.add('text-slate-500');
+            });
+            document.getElementById('tab-' + tab).classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            document.getElementById('tab-' + tab).classList.remove('text-slate-500');
+            
+            document.getElementById('tab-content-customers').classList.add('hidden');
+            document.getElementById('tab-content-config').classList.add('hidden');
+            document.getElementById('tab-content-' + tab).classList.remove('hidden');
+        }
+        
+        function renderCustomers() {
+            const tbody = document.getElementById('customer-table-body');
+            if (!tbody) return;
+            
+            const gradeFilter = document.getElementById('filter-grade')?.value || 'all';
+            const emailFilter = document.getElementById('filter-email')?.value || 'all';
+            
+            let customers = store.customers.filter(c => c.taskId === store.currentTaskId);
+            
+            if (gradeFilter !== 'all') customers = customers.filter(c => c.grade === gradeFilter);
+            if (emailFilter !== 'all') customers = customers.filter(c => c.emailStatus === emailFilter);
+            
+            tbody.innerHTML = customers.map(c => {
+                const hasWhatsApp = c.whatsapp && c.whatsapp.connected;
+                const isOnline = hasWhatsApp && c.whatsapp.status === 'online';
+                
+                return `
+                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                        <td class="py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full flex items-center justify-center text-blue-600 font-semibold">${c.name.charAt(0)}</div>
+                                <div>
+                                    <p class="font-medium text-slate-800">${c.name}</p>
+                                    <p class="text-sm text-slate-500">${c.company}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4">
+                            <span class="grade-${c.grade.toLowerCase()} px-2 py-1 text-xs font-medium rounded">${c.grade}级</span>
+                        </td>
+                        <td class="py-4">
+                            ${hasWhatsApp ? `
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="message-circle" class="w-4 h-4 text-white"></i>
+                                    </div>
+                                    <span class="text-xs ${isOnline ? 'text-green-600 font-medium' : 'text-slate-400'}">${isOnline ? '在线' : c.whatsapp.lastSeen}</span>
+                                </div>
+                            ` : '<span class="text-xs text-slate-400">未连接</span>'}
+                        </td>
+                        <td class="py-4">
+                            ${c.emailStatus === 'sent' 
+                                ? '<span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">已发送</span>'
+                                : '<span class="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">待发送</span>'
+                            }
+                        </td>
+                        <td class="py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <button onclick="showCustomerDetail('${c.id}')" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="查看详情">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                                ${c.emailStatus === 'none' ? `
+                                    <button onclick="openEmailModal('${c.id}')" class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="写开发信">
+                                        <i data-lucide="mail" class="w-4 h-4"></i>
+                                    </button>
+                                ` : `
+                                    <button onclick="showToast('开发信已发送', 'info')" class="p-2 text-emerald-500" title="已发送">
+                                        <i data-lucide="check" class="w-4 h-4"></i>
+                                    </button>
+                                `}
+                                ${hasWhatsApp ? `
+                                    <button onclick="openChat('${c.id}')" class="p-2 text-slate-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors" title="WhatsApp">
+                                        <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            lucide.createIcons();
+        }
+        
+        // ==========================================
+        // WHATSAPP CHAT
+        // ==========================================
+        function renderWhatsAppList() {
+            const container = document.getElementById('whatsapp-chat-list');
+            if (!container) return;
+            
+            const connected = store.customers.filter(c => c.whatsapp.connected);
+            
+            container.innerHTML = connected.map(c => {
+                const isOnline = c.whatsapp.status === 'online';
+                const lastMsg = c.chatHistory[c.chatHistory.length - 1];
+                const isActive = store.currentCustomerId === c.id;
+                
+                return `
+                    <div class="p-3 hover:bg-slate-50 cursor-pointer transition-colors ${isActive ? 'bg-blue-50 border-l-2 border-blue-600' : ''}" onclick="openChat('${c.id}')">
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full flex items-center justify-center text-blue-600 font-semibold">${c.name.charAt(0)}</div>
+                                ${isOnline ? `<div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>` : ''}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-medium text-slate-800 truncate">${c.name}</h4>
+                                    ${lastMsg ? `<span class="text-xs text-slate-400">${lastMsg.time}</span>` : ''}
+                                </div>
+                                <p class="text-sm text-slate-500 truncate">${lastMsg ? lastMsg.content.substring(0, 30) + '...' : '点击开始聊天'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function openChat(customerId) {
+            const customer = store.customers.find(c => c.id === customerId);
+            if (!customer) return;
+            
+            store.currentCustomerId = customerId;
+            
+            // If on demand detail, switch to whatsapp page first
+            if (!document.getElementById('page-whatsapp').classList.contains('hidden') === false) {
+                showPage('whatsapp');
+            }
+            
+            document.getElementById('whatsapp-empty').classList.add('hidden');
+            document.getElementById('whatsapp-active').classList.remove('hidden');
+            document.getElementById('whatsapp-active').classList.add('flex');
+            
+            document.getElementById('chat-avatar').textContent = customer.name.charAt(0);
+            document.getElementById('chat-name').textContent = customer.name;
+            
+            const isOnline = customer.whatsapp.status === 'online';
+            document.getElementById('chat-status').textContent = isOnline ? '在线' : customer.whatsapp.lastSeen;
+            document.getElementById('chat-status').className = isOnline ? 'text-xs text-green-600' : 'text-xs text-slate-400';
+            document.getElementById('chat-online').style.display = isOnline ? 'block' : 'none';
+            
+            renderMessages(customer);
+            renderWhatsAppList();
+            lucide.createIcons();
+        }
+        
+        function renderMessages(customer) {
+            const container = document.getElementById('chat-messages');
+            if (!container) return;
+            
+            if (!customer.chatHistory || customer.chatHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="message-circle" class="w-8 h-8 text-green-500"></i>
+                        </div>
+                        <p class="text-slate-500">开始与 ${customer.name} 的对话</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = customer.chatHistory.map(msg => {
+                const isSent = msg.type === 'sent';
+                return `
+                    <div class="flex ${isSent ? 'justify-end' : 'justify-start'}">
+                        <div class="max-w-[70%] ${isSent ? 'bg-gradient-to-br from-blue-600 to-blue-500 text-white' : 'bg-white border border-slate-200'} rounded-2xl px-4 py-2.5 shadow-sm">
+                            <p class="text-sm">${msg.content}</p>
+                            <div class="flex items-center justify-end gap-1 mt-1">
+                                <span class="text-xs ${isSent ? 'text-blue-200' : 'text-slate-400'}">${msg.time}</span>
+                                ${isSent ? '<span class="text-xs">✓✓</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const content = input.value.trim();
+            if (!content || !store.currentCustomerId) return;
+            
+            const customer = store.customers.find(c => c.id === store.currentCustomerId);
+            if (!customer) return;
+            
+            customer.chatHistory.push({
+                type: 'sent',
+                content: content,
+                time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+                status: 'read'
+            });
+            
+            input.value = '';
+            renderMessages(customer);
+            
+            // Auto reply
+            setTimeout(() => {
+                customer.chatHistory.push({
+                    type: 'received',
+                    content: 'Thanks for your message. I will get back to you soon.',
+                    time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+                    status: 'unread'
+                });
+                renderMessages(customer);
+                renderWhatsAppList();
+                showToast('收到 ' + customer.name + ' 的新消息', 'info');
+            }, 2000);
+        }
+        
+        function sendQuick(text) {
+            document.getElementById('chat-input').value = text;
+            sendMessage();
+        }
+        
+        // ==========================================
+        // TOAST NOTIFICATIONS
+        // ==========================================
+        function showToast(message, type) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-emerald-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-600'
+            };
+            
+            toast.className = `${colors[type]} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 toast font-medium`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info'}" class="w-5 h-5"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // ==========================================
+        // LIVE SIMULATION
+        // ==========================================
+        function startSimulation() {
+            setInterval(() => {
+                const events = [
+                    { type: 'discovery', message: 'NEO 发现新的 A级客户', icon: 'search' },
+                    { type: 'whatsapp', message: 'John Smith 发送了新消息', icon: 'message-circle' },
+                    { type: 'email', message: '客户打开了您的开发信', icon: 'mail' }
+                ];
+                
+                const event = events[Math.floor(Math.random() * events.length)];
+                showToast(event.message, event.type === 'discovery' ? 'success' : 'info');
+                
+                // Update stats
+                const statNew = document.getElementById('stat-new-customers');
+                if (statNew) {
+                    statNew.textContent = parseInt(statNew.textContent) + 1;
+                }
+            }, 20000);
+        }
+        
+        // ==========================================
+        // INIT
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            renderTaskList();
+            renderActivityList();
+            startSimulation();
+            console.log('DealClaw Demo initialized');
+        });
+    </script>
+</body>
+</html>
